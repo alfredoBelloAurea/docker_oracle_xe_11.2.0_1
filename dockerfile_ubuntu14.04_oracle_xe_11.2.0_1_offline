@@ -1,0 +1,65 @@
+FROM ubuntu:14.04
+
+MAINTAINER Alfredo Bello <alfredo.bello@aurea.com>
+
+## no interactive terminal
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+
+## add files
+ADD chkconfig /sbin/chkconfig
+ADD init.ora /
+ADD initXETemp.ora /
+ADD startup.sh /usr/sbin/startup.sh
+
+#RUN mv startup.sh /usr/sbin/startup.sh
+RUN chmod +x /usr/sbin/startup.sh
+
+## update sources list
+RUN apt-get update 
+
+## install curl in oder to get the software
+RUN apt-get install curl -y -f 
+
+## some dependencies
+RUN apt-get install libaio1 net-tools bc -y -f
+
+RUN ln -s /usr/bin/awk /bin/awk
+RUN mkdir /var/lock/subsys
+RUN ln -sf /proc/mounts /etc/mtab
+RUN chmod 777 /sbin/chkconfig
+
+## get the binaries and copy them to /tmp
+COPY ./bin /tmp
+
+## change name
+RUN cat /tmp/oracle-xe_11.2.0-1.0_amd64.deba* > /tmp/oracle-xe_11.2.0-1.0_amd64.deb
+
+## install db
+RUN dpkg --install /tmp/oracle-xe_11.2.0-1.0_amd64.deb     
+
+## Backup listener.ora as template
+RUN cp /u01/app/oracle/product/11.2.0/xe/network/admin/listener.ora /u01/app/oracle/product/11.2.0/xe/network/admin/listener.ora.tmpl
+
+## delete binaries
+RUN rm /tmp/oracle-xe_11.2.0-1.0_amd64.deb
+
+## prevent services from starting automatically
+RUN echo exit 0 > /usr/sbin/policy-rc.d
+
+## db configuration files
+RUN mv /init.ora /u01/app/oracle/product/11.2.0/xe/config/scripts 
+RUN mv /initXETemp.ora /u01/app/oracle/product/11.2.0/xe/config/scripts 
+RUN printf 8080\\n1521\\noracle\\noracle\\ny\\n | /etc/init.d/oracle-xe configure 
+
+## environment vars
+RUN echo 'export ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe' >> /etc/bash.bashrc 
+RUN echo 'export PATH=$ORACLE_HOME/bin:$PATH' >> /etc/bash.bashrc
+RUN echo 'export ORACLE_SID=XE' >> /etc/bash.bashrc 
+
+VOLUME /usr/lib/oracle/xe/oradata/XE
+
+EXPOSE 1521
+EXPOSE 8080
+
+CMD /usr/sbin/startup.sh && /bin/bash

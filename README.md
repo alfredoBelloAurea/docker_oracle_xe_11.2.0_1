@@ -13,13 +13,13 @@ PASSWORDS:                       user: system pass: oracle
 EXPOSE:                          8080, 1521
 
 ### build online image
-docker build --no-cache=true -f dockerfile_ubuntu14.04_oracle_xe_11.2.0_1_online -t aurea/oracle_xe_11.2.0_1 .
+docker build --no-cache=true -f dockerfile_ubuntu14.04_oracle_xe_11.2.0_1_online -t ubuntu14.04/oracle_xe_11.2.0_1 .
 
 ### build offline image
-docker build --no-cache=true -f dockerfile_ubuntu14.04_oracle_xe_11.2.0_1_offline -t aurea/oracle_xe_11.2.0_1 .
+docker build --no-cache=true -f dockerfile_14.04_oracle_xe_11.2.0_1_offline -t ubuntu14.04/oracle_xe_11.2.0_1 .
 
 ### run image
-docker run --name oracle_xe_11.2.0_1 -d -i -t -p 8080:8080 -p 1521:1521 aurea/oracle_xe_11.2.0_1
+docker run --name oracle_xe_11.2.0_1 -d -i -t -p 8080:8080 -p 1521:1521 ubuntu14.04/oracle_xe_11.2.0_1
 
 ### stop container
 docker stop oracle_xe_11.2.0_1

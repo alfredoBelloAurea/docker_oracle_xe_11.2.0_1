@@ -12,6 +12,7 @@ ADD chkconfig /sbin/chkconfig
 ADD init.ora /
 ADD initXETemp.ora /
 ADD startup.sh /usr/sbin/startup.sh
+ADD setup-db-oracle.sql /tmp/setup-db-oracle.sql
 
 ## no interactive terminal
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && \
@@ -62,6 +63,10 @@ echo 'export ORACLE_SID=XE' >> /etc/bash.bashrc && \
 
 # startup script
 chmod +x /usr/sbin/startup.sh
+
+## create user in db
+/u01/app/oracle/product/11.2.0/xe/bin/sqlplus system/oracle < /tmp/setup-db-oracle.sql && \
+rm /tmp/setup-db-oracle.sql
 
 VOLUME /usr/lib/oracle/xe/oradata/XE
 

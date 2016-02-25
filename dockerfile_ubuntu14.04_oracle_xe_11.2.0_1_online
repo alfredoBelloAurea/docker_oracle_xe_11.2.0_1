@@ -4,6 +4,8 @@ MAINTAINER Alfredo Bello <alfredo.bello@aurea.com>
 
 ## no interactive terminal
 ENV DEBIAN_FRONTEND noninteractive
+ENV ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe ORACLE_SID=XE
+ENV SQLPLUS=$ORACLE_HOME/bin/sqlplus
 
 ## add files
 ADD chkconfig /sbin/chkconfig

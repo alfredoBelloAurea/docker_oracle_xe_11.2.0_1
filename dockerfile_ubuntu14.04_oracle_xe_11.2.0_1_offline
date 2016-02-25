@@ -4,12 +4,15 @@ MAINTAINER Alfredo Bello <alfredo.bello@aurea.com>
 
 ## no interactive terminal
 ENV DEBIAN_FRONTEND noninteractive
+ENV ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe ORACLE_SID=XE
+ENV SQLPLUS=$ORACLE_HOME/bin/sqlplus
 
 ## add files
 ADD chkconfig /sbin/chkconfig
 ADD init.ora /
 ADD initXETemp.ora /
 ADD startup.sh /usr/sbin/startup.sh
+ADD setup-db-oracle.sql /tmp/setup-db-oracle.sql
 
 ## get the binaries and copy them to /tmp
 COPY ./bin /tmp
@@ -57,7 +60,11 @@ echo 'export PATH=$ORACLE_HOME/bin:$PATH' >> /etc/bash.bashrc && \
 echo 'export ORACLE_SID=XE' >> /etc/bash.bashrc && \
 
 # start up script
-chmod +x /usr/sbin/startup.sh
+chmod +x /usr/sbin/startup.sh && \
+
+## create user in db
+/u01/app/oracle/product/11.2.0/xe/bin/sqlplus system/oracle < /tmp/setup-db-oracle.sql && \
+rm /tmp/setup-db-oracle.sql
 
 VOLUME /usr/lib/oracle/xe/oradata/XE
 
